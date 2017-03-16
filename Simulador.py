@@ -194,7 +194,7 @@ class SetUpSimulador:
         self.sensores.append(s)
 
     def run_simulator(self):
-        #self.start_consumers()
+        self.start_consumers()
         self.start_publishers()
 
     def start_consumers(self):
