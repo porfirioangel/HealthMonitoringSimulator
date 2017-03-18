@@ -75,6 +75,8 @@
 import os
 import time
 import pika
+
+from SensorAcelerometro import SensorAcelerometro
 from SensorTemperatura import SensorTemperatura
 from SensorRitmoCardiaco import SensorRitmoCardiaco
 from SensorPresion import SensorPresion
@@ -85,6 +87,7 @@ class SetUpSimulador:
     temperatura = 0
     ritmo_cardiaco = 0
     presion = 0
+    aceleracion = 0
 
     def main(self):
         print('+---------------------------------------------+')
@@ -111,6 +114,11 @@ class SetUpSimulador:
         print('|                      |     los latidos del  |')
         print('|                      |     corazón.         |')
         print('+----------------------+----------------------+')
+        print('|        Caída         |   - Cambios anormales|')
+        print('|                      |     en la velocidad  |')
+        print('|                      |     con la que se    |')
+        print('|                      |     mueve la persona.|')
+        print('+----------------------+----------------------+')
         print('')
         raw_input('presiona enter para continuar: ')
         print('')
@@ -130,7 +138,8 @@ class SetUpSimulador:
         print('')
         for x in xrange(0, int(publishers)):
             print('+---------------------------------------------+')
-            print('|            DATOS DEL ADULTO MAYOR |    ' + str(x) +  '    |')
+            print('|            DATOS DEL ADULTO MAYOR |    ' + str(x + 1) +
+                  '    |')
             print('+---------------------------------------------+')
             print('|           NOMBRE           |        ?       |')
             print('+---------------------------------------------+')
@@ -146,6 +155,9 @@ class SetUpSimulador:
             print('+---------------------------------------------+')
             self.create_heart_rate_sensor(nombre)
             print('|    SENSOR RITMO CARDIACO   |    ASIGNADO   |')
+            print('+---------------------------------------------+')
+            self.create_aceleration_sensor(nombre)
+            print('|     SENSOR ACELERACIÓN     |    ASIGNADO   |')
             print('+---------------------------------------------+')
             print('')
             raw_input('presiona enter para continuar: ')
@@ -173,6 +185,14 @@ class SetUpSimulador:
         print('+---------------------------------------------+')
         print('|      PRESION ARTERIAL      |      ' + presion_maxima + '       |')
         print('+---------------------------------------------+')
+        print('+---------------------------------------------+')
+        print('|        ACELERACIÓN        |        ?       |')
+        print('+---------------------------------------------+')
+        aceleracion_maxima = raw_input('aceleración máxima: ')
+        self.aceleracion = float(aceleracion_maxima)
+        print('+---------------------------------------------+')
+        print('|      ACELERACIÓN      |      ' + aceleracion_maxima + '       |')
+        print('+---------------------------------------------+')
         print('|   CONFIGURACIÓN DE LA SIMULACIÓN TERMINADA  |')
         print('+---------------------------------------------+')
         raw_input('presiona enter para continuar: ')
@@ -193,6 +213,10 @@ class SetUpSimulador:
         s = SensorRitmoCardiaco(nombre)
         self.sensores.append(s)
 
+    def create_aceleration_sensor(self, nombre):
+        s = SensorAcelerometro(nombre)
+        self.sensores.append(s)
+
     def run_simulator(self):
         self.start_consumers()
         self.start_publishers()
@@ -204,6 +228,9 @@ class SetUpSimulador:
             "gnome-terminal -e 'bash -c \"python RitmoCardiacoManager.py " + str(self.ritmo_cardiaco) + "; sleep 5 \"'")
         os.system(
             "gnome-terminal -e 'bash -c \"python PresionManager.py " + str(self.presion) + "; sleep 5 \"'")
+        os.system(
+            "gnome-terminal -e 'bash -c \"python AcelerometroManager.py " + str(
+                self.aceleracion) + "; sleep 5 \"'")
 
     def start_publishers(self):
         for x in xrange(0, 1000):

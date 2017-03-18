@@ -9,3 +9,8 @@
 
 ## Repositorio base
 https://github.com/arqdesw-curso/Arquitectura-Publica-Suscribe
+
+## Ejecutar simulador con entrada de datos pre-hecha:
+```
+cat input.txt | ./Simulador.py
+```
