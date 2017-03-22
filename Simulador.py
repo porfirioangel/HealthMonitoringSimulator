@@ -123,6 +123,12 @@ class SetUpSimulador:
         print('|                      |     con la que se    |')
         print('|                      |     mueve la persona.|')
         print('+----------------------+----------------------+')
+        print('|        Alarma        |   - Notifica cuando  |')
+        print('|                      |     es tiempo de que |')
+        print('|                      |     se los adultos   |')
+        print('|                      |     mayores tomen un |')
+        print('|                      |     medicamento.     |')
+        print('+----------------------+----------------------+')
         print('')
         raw_input('presiona enter para continuar: ')
         print('')
@@ -164,11 +170,12 @@ class SetUpSimulador:
             self.create_aceleration_sensor(nombre)
             print('|     SENSOR ACELERACIÓN     |    ASIGNADO   |')
             print('+---------------------------------------------+')
-        print('+---------------------------------------------+')
         self.create_alarm_sensor()
         random.shuffle(self.sensores)
-        print('|   SENSOR ALARMA MEDICINA    |    ASIGNADO   |')
-        print('+---------------------------------------------+')
+        print('')
+        print('###############################################')
+        print('#   SENSOR ALARMA MEDICINA    #    ASIGNADO   #')
+        print('###############################################')
         print('')
         raw_input('presiona enter para continuar: ')
         print('+---------------------------------------------+')
@@ -207,41 +214,22 @@ class SetUpSimulador:
         print(
             '|      ACELERACIÓN      |      ' + aceleracion_maxima + '       |')
         print('+---------------------------------------------+')
-        print('|   CONFIGURACIÓN DE LA SIMULACIÓN TERMINADA  |')
+        print('|    ALARMAS MEDICAMENTOS    |        ?       |')
         print('+---------------------------------------------+')
+        archivo_alarmas = raw_input("Archivo de datos de alarmas: ")
+        print('+---------------------------------------------+')
+        print('|    ALARMAS MEDICAMENTOS    | ' + archivo_alarmas + ' |')
+        print('+---------------------------------------------+')
+        print('')
+        print('###############################################')
+        print('#   CONFIGURACIÓN DE LA SIMULACIÓN TERMINADA  #')
+        print('###############################################')
+        print('')
         raw_input('presiona enter para continuar: ')
         print('+---------------------------------------------+')
         print('|             INICIANDO SIMULACIÓN            |')
         print('+---------------------------------------------+')
-        print('+---------------------------------------------+')
-        print('|    ALARMAS MEDICAMENTOS    |        ?       |')
-        print('+---------------------------------------------+')
-        # TODO Realizar registro de medicinas y horas
-        self.alarmas_medicamentos = {
-            TimeGenerator.generate_time_string(hour=1, minute=0, second=0,
-                                               microsecond=0):
-                'paracetamol -> 1 pastilla',
-            TimeGenerator.generate_time_string(hour=5, minute=0, second=0,
-                                               microsecond=0):
-                'ibuprofeno -> 1 pastilla',
-            TimeGenerator.generate_time_string(hour=9, minute=0, second=0,
-                                               microsecond=0):
-                'insulina -> 1 inyeccion',
-            TimeGenerator.generate_time_string(hour=13, minute=0, second=0,
-                                               microsecond=0):
-                'furosemida -> 2 pastillas',
-            TimeGenerator.generate_time_string(hour=17, minute=0, second=0,
-                                               microsecond=0):
-                'piroxicam -> 1 pastilla',
-            TimeGenerator.generate_time_string(hour=21, minute=0, second=0,
-                                               microsecond=0):
-                'tolbutamida -> 2 pastilla2',
-        }
-        print('+---------------------------------------------+')
-        print('|    ALARMAS MEDICAMENTOS    |        ' +
-              str(self.alarmas_medicamentos) + '       |')
-        print('+---------------------------------------------+')
-        self.run_simulator()
+        self.run_simulator(archivo_alarmas)
 
     def create_temperature_sensor(self, nombre):
         s = SensorTemperatura(nombre)
@@ -263,25 +251,25 @@ class SetUpSimulador:
         s = SensorAlarmaMedicina()
         self.sensores.append(s)
 
-    def run_simulator(self):
-        self.start_consumers()
+    def run_simulator(self, archivo_alarmas):
+        self.start_consumers(archivo_alarmas)
         self.start_publishers()
 
-    def start_consumers(self):
-        # os.system(
-        #     "gnome-terminal -e 'bash -c \"python TemperaturaManager.py " + str(
-        #         self.temperatura) + "; sleep 5 \"'")
-        # os.system(
-        #     "gnome-terminal -e 'bash -c \"python RitmoCardiacoManager.py " + str(
-        #         self.ritmo_cardiaco) + "; sleep 5 \"'")
-        # os.system(
-        #     "gnome-terminal -e 'bash -c \"python PresionManager.py " + str(
-        #         self.presion) + "; sleep 5 \"'")
-        # os.system(
-        #     "gnome-terminal -e 'bash -c \"python AcelerometroManager.py " + str(
-        #         self.aceleracion) + "; sleep 5 \"'")
+    def start_consumers(self, archivo_alarmas):
         os.system(
-            "gnome-terminal -e 'bash -c \"cat input_horas_medicinas | python "
+            "gnome-terminal -e 'bash -c \"python TemperaturaManager.py " + str(
+                self.temperatura) + "; sleep 5 \"'")
+        os.system(
+            "gnome-terminal -e 'bash -c \"python RitmoCardiacoManager.py " + str(
+                self.ritmo_cardiaco) + "; sleep 5 \"'")
+        os.system(
+            "gnome-terminal -e 'bash -c \"python PresionManager.py " + str(
+                self.presion) + "; sleep 5 \"'")
+        os.system(
+            "gnome-terminal -e 'bash -c \"python AcelerometroManager.py " + str(
+                self.aceleracion) + "; sleep 5 \"'")
+        os.system(
+            "gnome-terminal -e 'bash -c \"cat " + archivo_alarmas + " | python "
             "AlarmaMedicinaManager.py; sleep 5 \"'")
 
 
