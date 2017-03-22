@@ -17,22 +17,22 @@
         Responsabilidad:
             - Recibir mensajes
             - Notificar al monitor
-            - Filtrar valores extremos de aceleración
+            - Filtrar horarios en los que corresponde tomar una medicina
         Propiedades:
-            - Se suscribe a la cola 'direct_acelerometer'
-            - Define un rango en la que la aceleración tiene valores válidos
+            - Se suscribe a la cola 'direct_alarma_medicina'
+            - Define un conjunto de horarios en los que corresponde tomar
+            alguna medicina
             - Notifica al monitor un segundo después de recibir el mensaje
     ----------------------------------------------------------------------------
     Métodos de la clase:
     setUpManager()
-        Parámetros: int: max
-        Función: Establece el valor máximo permitido de la temperatura
+        Parámetros: None
+        Función: Lee la entrada de datos donde vienen los horarios y
+        medicinas que corresponde tomar
     start_consuming()
         Parámetros: None
         Función:
-            - Lee los argumentos con los que se ejecuta el programa para
-            establecer el valor máximo que puede tomar la temperatura
-            - Realiza la conexión con el servidor de RabbitMQ loca
+            - Realiza la conexión con el servidor de RabbitMQ local
             - Declara el tipo de intercambio y a qué cola se va a suscribir
             - Comienza a esperar los eventos
     callback()
@@ -63,11 +63,11 @@ class AlarmaMedicinaManager:
     status = ""
     values_parameters = 0
 
-    def setUpManager(self, horas_medicina):
-        self.horas_medicina = horas_medicina
+    def setUpManager(self):
+        self.horas_medicina = json.loads(raw_input())
 
     def start_consuming(self):
-        self.horas_medicina = json.loads(raw_input())
+
         # self.setUpManager(self.values_parameters)
         #   +--------------------------------------------------------------------------------------+
         #   | La siguiente linea permite realizar la conexión con el servidor que aloja a RabbitMQ |
@@ -114,4 +114,5 @@ class AlarmaMedicinaManager:
 
 
 test = AlarmaMedicinaManager()
+test.setUpManager()
 test.start_consuming()

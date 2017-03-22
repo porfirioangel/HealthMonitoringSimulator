@@ -20,15 +20,6 @@
             - Envía mensajes con la hora actual a la cola
     ----------------------------------------------------------------------------
     Métodos de la clase:
-    __init__()
-        Parámetros: String: nombre
-        Función: Inicializa los valores de nombre e id
-    set_id()
-        Parámetros: None
-        Función: Genera de manera aleatora el id del usuario
-    get_name()
-        Parámetros: None
-        Función: Devuelve el nombre del usuario al cual fue asignado el sensor
     start_service()
         Parámetros: None
         Función:
@@ -46,16 +37,15 @@
     funcionamiento interno de RabbitMQ puedes visitar: https://www.rabbitmq.com/
     ----------------------------------------------------------------------------
 '''
+
 import pika
 import random
 import json
-from datetime import datetime
 
 from TimeGenerator import TimeGenerator
 
 
 class SensorAlarmaMedicina:
-
     def start_service(self):
         #   +--------------------------------------------------------------------------------------+
         #   | La siguiente linea permite realizar la conexión con el servidor que aloja a RabbitMQ |
@@ -88,4 +78,3 @@ class SensorAlarmaMedicina:
         random_hour = random.randint(int(0), int(23))
         return TimeGenerator.generate_time_string(hour=random_hour, minute=0,
                                                   second=0, microsecond=0)
-
