@@ -3,7 +3,7 @@
 
 '''
     ----------------------------------------------------------------------------
-    Archivo: SensorAcelerometro.py
+    Archivo: SensorAlarmaMedicina.py
     Capitulo: 3 Estilo Publica-Subscribe
     Autor(es): Porfirio Ángel Díaz Sánchez.
     Version: 1 - Marzo 2017
@@ -16,8 +16,8 @@
     Publicador
         Responsabilidad: Enviar mensajes
         Propiedades:
-            - Se conecta a la cola 'direct_acelerometer'
-            - Envía datos de aceleración a la cola
+            - Se conecta a la cola 'direct_alarma_medicina'
+            - Envía mensajes con la hora actual a la cola
     ----------------------------------------------------------------------------
     Métodos de la clase:
     __init__()
@@ -37,7 +37,7 @@
             - Define qué tipo de publicación se utilizará.
     simulate_data()
         Parámetros: None
-        Función: Genera un número aleatorio entre 0 y 20
+        Función: Genera una hora aleatoria entre 00:00 y 23:59
     ----------------------------------------------------------------------------
     NOTA: "propio de Rabbit" implica que se utilizan de manera interna para
     realizar de manera correcta la recepcion de datos, para éste ejemplo no
@@ -49,21 +49,12 @@
 import pika
 import random
 import json
+from datetime import datetime
+
+from TimeGenerator import TimeGenerator
 
 
-class SensorAcelerometro:
-    nombre = None
-    id = 0
-
-    def __init__(self, nombre):
-        self.nombre = nombre
-        self.id = int(self.set_id())
-
-    def set_id(self):
-        return random.randint(1000, 5000)
-
-    def get_name(self):
-        return self.nombre
+class SensorAlarmaMedicina:
 
     def start_service(self):
         #   +--------------------------------------------------------------------------------------+
@@ -75,28 +66,26 @@ class SensorAcelerometro:
         #   +----------------------------------------------------------------------------------------+
         #   | La siguiente linea permite definir el tipo de intercambio y de que cola recibirá datos |
         #   +----------------------------------------------------------------------------------------+
-        channel.exchange_declare(exchange='direct_acelerometer', type='direct')
-        severity = 'aceleracion_movimiento'
-        aceleracion_generada = self.simulate_data()
-        mensaje = 'AC:' + str(self.id) + ':' + self.nombre + \
-                  ':' + json.dumps(aceleracion_generada)
+        channel.exchange_declare(exchange='direct_alarma_medicina',
+                                 type='direct')
+        severity = 'alarma_hora'
+        hora_generada = self.simulate_data()
+        mensaje = 'AL:med' + ':' + json.dumps(hora_generada)
         #   +----------------------------------------------------------------------------+
         #   | La siguiente linea permite enviar datos a la cola seleccionada.            |
         #   +----------------------------------------------------------------------------+
-        channel.basic_publish(exchange='direct_acelerometer',
+        channel.basic_publish(exchange='direct_alarma_medicina',
                               routing_key=severity, body=mensaje)
         print(
             '+---------------+--------------------+-------------------------------+-------+')
-        print('|      ' + str(
-            self.id) + '     |     ' + self.nombre + '     |   ACELERACIÓN '
-                                                     'ENVIADA   '
-                                                     '|  '
-              + str(aceleracion_generada) + '  |')
+        print('|      HORA ENVIADA   |  ' + str(hora_generada) + '  |')
         print(
             '+---------------+--------------------+-------------------------------+-------+')
         print('')
         connection.close()
 
     def simulate_data(self):
-        return {'x': random.random() * 20, 'y': random.random() * 20,
-                'z': random.random() * 20}
+        random_hour = random.randint(int(0), int(23))
+        return TimeGenerator.generate_time_string(hour=random_hour, minute=0,
+                                                  second=0, microsecond=0)
+

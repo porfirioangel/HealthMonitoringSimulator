@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#--------------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------------
 # Archivo: Simulador.py
 # Capitulo: 3 Estilo Publica-Subscribe
 # Autor(es): Perla Velasco & Yonathan Mtz.
@@ -70,16 +70,20 @@
 #           |                         |                          |    sensores.          |
 #           +-------------------------+--------------------------+-----------------------+
 #
-#--------------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------------
 
 import os
 import time
 import pika
+import json
 
+from TimeGenerator import TimeGenerator
+from SensorAlarmaMedicina import SensorAlarmaMedicina
 from SensorAcelerometro import SensorAcelerometro
 from SensorTemperatura import SensorTemperatura
 from SensorRitmoCardiaco import SensorRitmoCardiaco
 from SensorPresion import SensorPresion
+import random
 
 
 class SetUpSimulador:
@@ -129,7 +133,8 @@ class SetUpSimulador:
         print('+---------------------------------------------+')
         publishers = raw_input('número entero: ')
         print('+---------------------------------------------+')
-        print('|        Número de publicadores         |  ' + publishers +  '  |')
+        print(
+            '|        Número de publicadores         |  ' + publishers + '  |')
         print('+---------------------------------------------+')
         print('|            ASIGNACIÓN DE SENSORES           |')
         print('+---------------------------------------------+')
@@ -145,7 +150,7 @@ class SetUpSimulador:
             print('+---------------------------------------------+')
             nombre = raw_input('escribe el nombre: ')
             print('+---------------------------------------------+')
-            print('|           NOMBRE           | ' + nombre +' |')
+            print('|           NOMBRE           | ' + nombre + ' |')
             print('+---------------------------------------------+')
             self.create_temperature_sensor(nombre)
             print('|     SENSOR TEMPERATURA     |    ASIGNADO   |')
@@ -159,8 +164,13 @@ class SetUpSimulador:
             self.create_aceleration_sensor(nombre)
             print('|     SENSOR ACELERACIÓN     |    ASIGNADO   |')
             print('+---------------------------------------------+')
-            print('')
-            raw_input('presiona enter para continuar: ')
+        print('+---------------------------------------------+')
+        self.create_alarm_sensor()
+        random.shuffle(self.sensores)
+        print('|   SENSOR ALARMA MEDICINA    |    ASIGNADO   |')
+        print('+---------------------------------------------+')
+        print('')
+        raw_input('presiona enter para continuar: ')
         print('+---------------------------------------------+')
         print('|        VALORES MÁXIMOS DE LOS EVENTOS       |')
         print('+---------------------------------------------+')
@@ -169,21 +179,24 @@ class SetUpSimulador:
         temperatura_maxima = raw_input('temperatura máxima: ')
         self.temperatura = int(temperatura_maxima)
         print('+---------------------------------------------+')
-        print('|          TEMPERATURA       |       ' + temperatura_maxima + '       |')
+        print(
+            '|          TEMPERATURA       |       ' + temperatura_maxima + '       |')
         print('+---------------------------------------------+')
         print('|       RITMO CARDIACO       |        ?       |')
         print('+---------------------------------------------+')
         ritmo_maximo = raw_input('ritmo máximo: ')
         self.ritmo_cardiaco = int(ritmo_maximo)
         print('+---------------------------------------------+')
-        print('|       RITMO CARDIACO       |      ' + ritmo_maximo +'       |')
+        print(
+            '|       RITMO CARDIACO       |      ' + ritmo_maximo + '       |')
         print('+---------------------------------------------+')
         print('|      PRESION ARTERIAL      |        ?       |')
         print('+---------------------------------------------+')
         presion_maxima = raw_input('presión máxima: ')
         self.presion = int(presion_maxima)
         print('+---------------------------------------------+')
-        print('|      PRESION ARTERIAL      |      ' + presion_maxima + '       |')
+        print(
+            '|      PRESION ARTERIAL      |      ' + presion_maxima + '       |')
         print('+---------------------------------------------+')
         print('+---------------------------------------------+')
         print('|        ACELERACIÓN        |        ?       |')
@@ -191,13 +204,42 @@ class SetUpSimulador:
         aceleracion_maxima = raw_input('aceleración máxima: ')
         self.aceleracion = float(aceleracion_maxima)
         print('+---------------------------------------------+')
-        print('|      ACELERACIÓN      |      ' + aceleracion_maxima + '       |')
+        print(
+            '|      ACELERACIÓN      |      ' + aceleracion_maxima + '       |')
         print('+---------------------------------------------+')
         print('|   CONFIGURACIÓN DE LA SIMULACIÓN TERMINADA  |')
         print('+---------------------------------------------+')
         raw_input('presiona enter para continuar: ')
         print('+---------------------------------------------+')
         print('|             INICIANDO SIMULACIÓN            |')
+        print('+---------------------------------------------+')
+        print('+---------------------------------------------+')
+        print('|    ALARMAS MEDICAMENTOS    |        ?       |')
+        print('+---------------------------------------------+')
+        # TODO Realizar registro de medicinas y horas
+        self.alarmas_medicamentos = {
+            TimeGenerator.generate_time_string(hour=1, minute=0, second=0,
+                                               microsecond=0):
+                'paracetamol -> 1 pastilla',
+            TimeGenerator.generate_time_string(hour=5, minute=0, second=0,
+                                               microsecond=0):
+                'ibuprofeno -> 1 pastilla',
+            TimeGenerator.generate_time_string(hour=9, minute=0, second=0,
+                                               microsecond=0):
+                'insulina -> 1 inyeccion',
+            TimeGenerator.generate_time_string(hour=13, minute=0, second=0,
+                                               microsecond=0):
+                'furosemida -> 2 pastillas',
+            TimeGenerator.generate_time_string(hour=17, minute=0, second=0,
+                                               microsecond=0):
+                'piroxicam -> 1 pastilla',
+            TimeGenerator.generate_time_string(hour=21, minute=0, second=0,
+                                               microsecond=0):
+                'tolbutamida -> 2 pastilla2',
+        }
+        print('+---------------------------------------------+')
+        print('|    ALARMAS MEDICAMENTOS    |        ' +
+              str(self.alarmas_medicamentos) + '       |')
         print('+---------------------------------------------+')
         self.run_simulator()
 
@@ -217,26 +259,38 @@ class SetUpSimulador:
         s = SensorAcelerometro(nombre)
         self.sensores.append(s)
 
+    def create_alarm_sensor(self):
+        s = SensorAlarmaMedicina()
+        self.sensores.append(s)
+
     def run_simulator(self):
         self.start_consumers()
         self.start_publishers()
 
     def start_consumers(self):
+        # os.system(
+        #     "gnome-terminal -e 'bash -c \"python TemperaturaManager.py " + str(
+        #         self.temperatura) + "; sleep 5 \"'")
+        # os.system(
+        #     "gnome-terminal -e 'bash -c \"python RitmoCardiacoManager.py " + str(
+        #         self.ritmo_cardiaco) + "; sleep 5 \"'")
+        # os.system(
+        #     "gnome-terminal -e 'bash -c \"python PresionManager.py " + str(
+        #         self.presion) + "; sleep 5 \"'")
+        # os.system(
+        #     "gnome-terminal -e 'bash -c \"python AcelerometroManager.py " + str(
+        #         self.aceleracion) + "; sleep 5 \"'")
         os.system(
-            "gnome-terminal -e 'bash -c \"python TemperaturaManager.py " + str(self.temperatura) + "; sleep 5 \"'")
-        os.system(
-            "gnome-terminal -e 'bash -c \"python RitmoCardiacoManager.py " + str(self.ritmo_cardiaco) + "; sleep 5 \"'")
-        os.system(
-            "gnome-terminal -e 'bash -c \"python PresionManager.py " + str(self.presion) + "; sleep 5 \"'")
-        os.system(
-            "gnome-terminal -e 'bash -c \"python AcelerometroManager.py " + str(
-                self.aceleracion) + "; sleep 5 \"'")
+            "gnome-terminal -e 'bash -c \"cat input_horas_medicinas | python "
+            "AlarmaMedicinaManager.py; sleep 5 \"'")
+
 
     def start_publishers(self):
         for x in xrange(0, 1000):
             for s in self.sensores:
                 s.start_service()
                 time.sleep(1.0)
+
 
 if __name__ == '__main__':
     simulador = SetUpSimulador()
