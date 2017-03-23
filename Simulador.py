@@ -74,10 +74,7 @@
 
 import os
 import time
-import pika
-import json
 
-from TimeGenerator import TimeGenerator
 from SensorAlarmaMedicina import SensorAlarmaMedicina
 from SensorAcelerometro import SensorAcelerometro
 from SensorTemperatura import SensorTemperatura

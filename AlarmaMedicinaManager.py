@@ -54,8 +54,9 @@
 '''
 
 import pika
-import sys
 import json
+
+from SignosVitales import SignosVitales
 
 
 class AlarmaMedicinaManager:
@@ -102,11 +103,13 @@ class AlarmaMedicinaManager:
     def callback(self, ch, method, properties, body):
         separators = self.get_substring_indexes(body, '"')
         hora_key = body[separators[0] + 1:separators[1]]
-        print 'Hora: ' + hora_key
-        if hora_key in self.horas_medicina:
-            print '    Es momento de: ' + self.horas_medicina[hora_key]
-        else:
-            print '    No hay medicinas programadas'
+        monitor = SignosVitales()
+        horizontal_line = '+--------------------------------------------------+'
+        monitor.print_notification(horizontal_line)
+        mensaje = 'Es momento de: ' + self.horas_medicina[hora_key] if \
+            hora_key in self.horas_medicina else 'No medicinas programadas'
+        monitor.print_notification('Hora: ' + hora_key + ' -> ' + mensaje)
+        monitor.print_notification(horizontal_line)
 
     def get_substring_indexes(self, string, substring):
         return [i for i in range(len(string)) if string.startswith(
